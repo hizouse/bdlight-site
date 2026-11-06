@@ -22,7 +22,9 @@ tbody tr:nth-child(even){background:var(--row)}
 .pos{color:var(--good);font-weight:600}.neg{color:var(--bad);font-weight:600}
 .small td{opacity:.6}
 footer{color:var(--muted);font-size:.82rem;margin-top:16px}
-nav{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 18px;border-bottom:1px solid var(--line)}
+nav{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin:0 0 18px;border-bottom:1px solid var(--line)}
+nav .lvl{font-size:.75rem;font-weight:700;letter-spacing:.06em;color:var(--muted);padding:8px 2px 8px 10px}
+nav .lvl:first-child{padding-left:0}
 nav a{padding:8px 12px;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-size:.92rem}
 nav a:hover{color:var(--fg)} nav a.on{color:var(--fg);border-bottom-color:var(--head);font-weight:600}
 th.grp{border-left:2px solid rgba(255,255,255,.35)} td.grp{border-left:2px solid var(--line)}
@@ -31,11 +33,22 @@ th{white-space:normal;min-width:56px}
 a.def{display:inline-block;margin-left:3px;width:14px;height:14px;line-height:14px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;font-size:10px;text-align:center;text-decoration:none;vertical-align:1px}
 a.def:hover{background:rgba(255,255,255,.5)}
 .explain a{color:inherit}
+.credit{margin-top:10px;font-style:italic}
+.credit a{color:inherit}
 .custom{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px;font-size:.92rem;padding:8px 10px;border:1px dashed var(--line);border-radius:8px}
 .custom input{width:56px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--fg)}
+.wrap{max-height:calc(100vh - 24px);overflow:auto;position:relative}
+#t thead th{position:sticky;top:0;z-index:2}
+#t th:nth-child(1),#t td:nth-child(1){position:sticky;left:0;width:48px;min-width:48px;max-width:48px;z-index:1}
+#t th:nth-child(2),#t td:nth-child(2){position:sticky;left:48px;min-width:150px;z-index:1;box-shadow:inset -1px 0 0 var(--line)}
+#t thead th:nth-child(1),#t thead th:nth-child(2){z-index:3}
+#t td:nth-child(1),#t td:nth-child(2){background:var(--bg)}
+#t tbody tr:nth-child(even) td:nth-child(1),#t tbody tr:nth-child(even) td:nth-child(2){background:var(--row)}
+.small td:nth-child(1),.small td:nth-child(2){opacity:1;color:var(--muted)}
+.controls select{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--fg)}
 .custom button{padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--fg);cursor:pointer}</style></head>
 <body><main>
-<nav><a href="index.html" class="">Overview</a><a href="decisions.html" class="">Swing decisions</a><a href="contact.html" class="">Contact</a><a href="power.html" class="on">Power</a></nav>
+<nav><span class="lvl">MLB</span><a href="index.html" class="">Overview</a><a href="decisions.html" class="">Decisions</a><a href="contact.html" class="">Contact</a><a href="power.html" class="on">Power</a><span class="lvl">AAA</span><a href="aaa.html" class="">Overview</a><a href="aaa_decisions.html" class="">Decisions</a><a href="aaa_contact.html" class="">Contact</a><a href="aaa_power.html" class="">Power</a></nav>
 <h1>2026 Power</h1><p class="sub">Quality-of-contact detail · MLB hitters with 400+ pitches · 2026 regular season</p>
 <div class="explain"><b>Power index</b> = weighted average of z EV90 (counted twice), z <a href="https://www.mlb.com/glossary/statcast/hard-hit-rate" target="_blank" rel="noopener">hard-hit%</a> and z <a href="https://www.mlb.com/glossary/statcast/sweet-spot" target="_blank" rel="noopener">sweet spot%</a>, as on the overview. EV90 is double-weighted because it carried the most weight of the three in 2024&ndash;2026 regressions on wRC+, both same-season and next-season. The other columns are for reference: xISO = <a href="https://www.mlb.com/glossary/statcast/expected-slugging-percentage" target="_blank" rel="noopener">xSLG</a> &minus; <a href="https://www.mlb.com/glossary/statcast/expected-batting-average" target="_blank" rel="noopener">xBA</a>; GB/LD/FB/PU are Statcast's batted-ball types; bat speed and blast% come from Statcast <a href="https://baseballsavant.mlb.com/leaderboard/bat-tracking" target="_blank" rel="noopener">bat tracking</a>.<br>Pool means (SD), 1,000+ pitches: avg EV 88.4 (2.8), max EV 110.9, EV90 104.2 (2.7), hard-hit 39.8% (7.8), sweet spot 35.6% (3.8), barrel/PA 5.3%, SLG .408, xSLG .401, ISO .161, xISO .155, GB 41.9%, LD 23.7%, FB 27.1%, PU 7.3%.</div>
 
@@ -48,14 +61,15 @@ const tb=document.querySelector('#t tbody'),q=document.getElementById('q'),pool=
 const P=C.length;const f2=x=>(x>0?'+':'')+x.toFixed(2);
 const fmt=(v,f)=>v==null?'':f==='int'?v.toLocaleString():f==='pct'?v.toFixed(1)+'%':f==='f1'?v.toFixed(1):f==='f2'?v.toFixed(2):f==='f3'?v.toFixed(3).replace(/^0/,'').replace(/^-0/,'-'):f2(v);
 document.querySelector('#t thead tr').innerHTML=C.map((c,i)=>`<th data-k="${i}" class="${c.f==='txt'?'l':''} ${c.g?'grp':''}" title="${c.t||''}">${c.n}${c.u?` <a class="def" href="${c.u}" target="_blank" rel="noopener" title="Definition" onclick="event.stopPropagation()">?</a>`:''}</th>`).join('');
-function applyCustom(){if(!CU)return;const w=CU.inputs.map(id=>parseFloat(document.getElementById(id).value)||0);D.forEach(r=>{r[CU.col]=Math.round((w[0]*r[CU.src[0]]+w[1]*r[CU.src[1]]+w[2]*r[CU.src[2]])*100)/100})}
+function applyCustom(){if(!CU)return;const w=CU.inputs.map(id=>parseFloat(document.getElementById(id).value)||0);D.forEach(r=>{r[CU.col]=Math.round(CU.src.reduce((a,s,j)=>a+w[j]*r[s],0)*100)/100})}
 function render(){const s=q.value.trim().toLowerCase();
- const rows=D.filter(r=>(!s||r[1].toLowerCase().includes(s))&&(!pool.checked||r[P]))
+ const lgEl=document.getElementById('lg'),LI=C.findIndex(c=>c.n==='Lg');
+ const rows=D.filter(r=>(!s||r[1].toLowerCase().includes(s))&&(!pool.checked||r[P])&&(!lgEl||!lgEl.value||r[LI]===lgEl.value))
   .sort((a,b)=>{const x=a[key],y=b[key];return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
  tb.innerHTML=rows.map(r=>`<tr class="${r[P]?'':'small'}">`+C.map((c,i)=>{const v=r[i];const cl=[c.f==='txt'?'l':'',c.g?'grp':'',c.f==='zc'?(v>=0?'pos':'neg'):''].join(' ');return `<td class="${cl}">${c.f==='txt'?v:fmt(v,c.f)}</td>`}).join('')+'</tr>').join('');
  cnt.textContent=rows.length+' hitters';
  document.querySelectorAll('th').forEach(th=>th.setAttribute('aria-sort',+th.dataset.k===key?(dir>0?'ascending':'descending'):'none'));}
 document.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{const k=+th.dataset.k;if(k===key)dir=-dir;else{key=k;dir=(C[k].d==='asc')?1:-1}render()}));
-q.addEventListener('input',render);pool.addEventListener('change',render);
+q.addEventListener('input',render);pool.addEventListener('change',render);if(document.getElementById('lg'))document.getElementById('lg').addEventListener('change',render);
 if(CU){CU.inputs.forEach(id=>document.getElementById(id).addEventListener('input',()=>{applyCustom();render()}));document.getElementById('cuReset').addEventListener('click',()=>{CU.inputs.forEach((id,i)=>document.getElementById(id).value=CU.def[i]);applyCustom();render()});document.getElementById('cuSort').addEventListener('click',()=>{key=CU.col;dir=-1;render()});applyCustom()}
 render();</script></body></html>
