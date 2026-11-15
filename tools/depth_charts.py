@@ -40,7 +40,9 @@ def cell(r, kind):
     tags = [x for x in [hand, (r.get('platoon') or '').strip()] if x]
     tip = '; '.join(x for x in [r.get('position1'), r.get('notes'), r.get('injurynotes')] if x)
     t = f' title="{H.escape(tip)}"' if tip else ''
-    return f'<span class="p"{t}>{nm}' + (f' <small>{" ".join(H.escape(x) for x in tags)}</small>' if tags else '') + '</span>'
+    pl = (r.get('platoon') or '').strip().lower()
+    pc = ' vsr' if pl == 'vsr' else ' vsl' if pl == 'vsl' else ''
+    return f'<span class="p{pc}"{t}>{nm}' + (f' <small>{" ".join(H.escape(x) for x in tags)}</small>' if tags else '') + '</span>'
 
 
 def team_rows(R):
@@ -105,6 +107,9 @@ def main():
             '.dc td.tm a{color:var(--fg);text-decoration:none}.dc td.tm a:hover{text-decoration:underline}'
             '.dc tr.div td{background:var(--row);color:var(--muted);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;position:static}'
             '.dc tbody tr:nth-child(even){background:none}.dc .p{display:inline-block;white-space:nowrap}.dc small{color:var(--muted);font-size:.7rem;margin-left:2px}'
+            '.dc .p.vsr{background:#cfe2ff;color:#0b2a5b;border-radius:3px;padding:0 3px}.dc .p.vsl{background:#ffd6d6;color:#5b0b0b;border-radius:3px;padding:0 3px}'
+            '.dc .p.vsr small,.dc .p.vsl small{color:inherit;opacity:.75}'
+            '@media (prefers-color-scheme:dark){.dc .p.vsr{background:#1d3557;color:#dbe8ff}.dc .p.vsl{background:#5a1f24;color:#ffe0e0}}'
             '.dc small.inj{display:block;margin:0 0 3px}.dc.il td{min-width:260px}.dc.il td.tm{min-width:52px}'
             'h2{font-size:1.05rem;margin:26px 0 8px}.lgtabs{display:flex;gap:6px;margin:0 0 6px}'
             '.lgtabs button{font:inherit;padding:5px 16px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--muted);cursor:pointer}'
@@ -123,7 +128,7 @@ def main():
             '<a href="https://www.fangraphs.com/roster-resource/depth-charts" target="_blank" rel="noopener">FanGraphs RosterResource</a>; '
             'all credit for the depth charts, roles, and injury notes goes to RosterResource. Click a team to open its RosterResource page. '
             '<b>Layout</b> follows Matt&rsquo;s preseason depth-chart spreadsheet. Small letters after a name: bats (hitters) or throws (pitchers), then any platoon role '
-            '(vsR = starts against right-handers, vsL = against left-handers). Hover a name for positions and notes. '
+            '(vsR = starts against right-handers, vsL = against left-handers). As on RosterResource, platoon players are shaded <span class="p vsr" style="background:#cfe2ff;color:#0b2a5b;padding:0 3px;border-radius:3px">blue vs RHP</span> and <span class="p vsl" style="background:#ffd6d6;color:#5b0b0b;padding:0 3px;border-radius:3px">red vs LHP</span>. Hover a name for positions and notes. '
             'Bullpen columns use RosterResource&rsquo;s roles: several names in CL, SU8th, or SU7th mean RosterResource lists a committee; '
             'the last column holds the fifth and later middle relievers, long relievers (LR), and any sixth starter. '
             'In the offseason, these are RosterResource&rsquo;s projected 2027 roles and will change with signings and trades. Refreshed weekly until Opening Day.</div>\n'
