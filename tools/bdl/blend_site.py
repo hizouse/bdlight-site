@@ -73,7 +73,7 @@ for f in ('scoresheet.html', 'scoresheet_ft_hitters.html'):
         v = sorted((r[ix['Adj OPS']] for r in D if r[ix['Pos']] == p), reverse=True); n = 61 if p == 'OF' else 21; rep[p] = v[min(n, len(v)) - 1]
     rep['DH'] = rep['1B']
     for r in D: r[ix['VORP 20']] = round(r[ix['Adj OPS']] - rep[r[ix['Pos']]], 3)
-    D.sort(key=lambda r: -r[ix['VORP 20']]); pc = {}
+    pc = {}   # keep D in its original row order: the FT Hitters page's PIN/PROT arrays are indexed by row
     o = sorted(D, key=lambda r: -r[ix['Adj OPS']])
     for i, r in enumerate(o): r[ix['Rk']] = i + 1; pc[r[ix['Pos']]] = pc.get(r[ix['Pos']], 0) + 1; r[ix['Pos Rk']] = pc[r[ix['Pos']]]
     for n_, t_ in (('OBP', 'Blend OBP: average of Steamer600 and BDL (see Projections)'), ('SLG', 'Blend SLG: average of Steamer600 and BDL (see Projections)')): C[ix[n_]]['t'] = t_
