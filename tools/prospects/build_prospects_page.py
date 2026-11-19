@@ -10,22 +10,22 @@ C=[dict(n='Rank',f='int',t='Rank by P(10+ career WAR)',d='asc'),dict(n='Player',
    dict(n='Age',f='f1',t='Age on July 1, 2026',d='asc'),dict(n='Age vs lg',f='f1s',t='Years older (+) or younger (−) than the PA-weighted average age of his league',d='asc'),
    dict(n='PA',f='int',t='2026 PA at A, A+, AA and AAA (levels with 150+ PA)'),
    dict(n='10+ WAR',f='pct',g=1,t='Probability of 10+ career MLB fWAR'),dict(n='3+ WAR season',f='pct',t='Probability of at least one 3+ fWAR season'),
-   dict(n='20+ WAR',f='pct',t='Probability of 20+ career fWAR'),dict(n='4+ WAR season',f='pct',t='Probability of at least one 4+ fWAR season'),
+   dict(n='20+ WAR',f='pct',t='Probability of 20+ career fWAR'),dict(n='5+ WAR season',f='pct',t='Probability of at least one 5+ fWAR season'),
    dict(n='wOBA z',f='zc',g=1,t='Park-adjusted wOBA, SDs vs. his league-season'),dict(n='K% z',f='zr',t='Park-adjusted K%, SDs vs. league (negative = fewer strikeouts, good)'),
    dict(n='ISO z',f='zc',t='Park-adjusted ISO, SDs vs. league'),dict(n='BB% z',f='zc',t='Park-adjusted unintentional BB%, SDs vs. league'),
    dict(n='Spd z',f='zc',t='FanGraphs Speed Score, SDs vs. league'),dict(n='SwStr% z',f='zr',t='Swinging-strike rate, SDs vs. league (negative = fewer whiffs, good)')]
 for c in C: c.setdefault('g',0); c.setdefault('t',''); c.setdefault('d','')
-D=[[i+1,r['name'],r.team,r.pos26,r.levels,round(r.age,1),round(r.agerel,1),int(r.PA),round(r.y10*100,1),round(r.s3*100,1),round(r.y20*100,1),round(r.s4*100,1),
+D=[[i+1,r['name'],r.team,r.pos26,r.levels,round(r.age,1),round(r.agerel,1),int(r.PA),round(r.y10*100,1),round(r.s3*100,1),round(r.y20*100,1),round(r.s5*100,1),
     round(r.wOBAa,2),round(r.Ka,2),round(r.ISOa,2),round(r.BBr,2),round(r.Spd,2),round(r.SwStr,2)] for i,r in a.iterrows()]
 nav=('<nav><span class="lvl">MINORS</span><a href="aaa.html" class="">AAA Overview</a><a href="aaa_decisions.html" class="">AAA Decisions</a>'
      '<a href="aaa_contact.html" class="">AAA Contact</a><a href="aaa_power.html" class="">AAA Power</a><a href="minors_prospects.html" class="on">Prospect Ranks</a>'
      '<a class="jump" href="index.html">MLB &rarr;</a><a href="scoresheet.html">Scoresheet &rarr;</a></nav>')
-explain=('<div class="explain">The chance each 2026 Low-A, High-A, AA, and AAA hitter (150+ PA at a level, under 130 career MLB at-bats before 2026) becomes a 10+ career WAR player, has a 3+ WAR season, reaches 20+ career WAR, or has a 4+ WAR season. '
- 'A logistic regression trained on 2007–2014 seasons (career outcomes) and 2007–2018 seasons (single-season outcomes), then recalibrated; outcomes are FanGraphs MLB batting WAR. '
+explain=('<div class="explain">The chance each 2026 Low-A, High-A, AA, and AAA hitter (150+ PA at a level, under 130 career MLB at-bats before 2026) becomes a 10+ career WAR player, has a 3+ WAR season, reaches 20+ career WAR, or has a 5+ WAR season. '
+ 'A logistic regression trained on 2007–2014 seasons (career outcomes) and 2007–2018 seasons (single-season outcomes), then recalibrated; outcomes are total FanGraphs position-player WAR (fWAR: batting, baserunning, fielding, positional). '
  'Inputs, each compared with the player\'s own league that season: <b>age vs. league</b> (birthdate, July 1), park-adjusted <b>wOBA, K%, ISO, BB%</b>, plus <b>Speed Score</b>, <b>SwStr%</b>, <b>Pull%</b>, and GB/LD/FB rates; '
  'the prior season\'s age and stats; level; prior MLB at-bats; and <b>share of games at each position</b>. A player at two levels gets a PA-weighted blend.<br>'
  'Biggest factors for 10+ WAR (odds multiplier, all else equal): each year younger than league ×2.4; +1 SD wOBA ×1.9; +1 SD ISO ×1.4; +1 SD Speed ×1.3; 1 SD fewer strikeouts ×1.35; a full season at C or SS ×5.5, CF ×4 (vs. 1B/DH).<br>'
- 'Cross-validated accuracy (AUC): 10+ WAR .89, 3+ WAR season .89, 20+ WAR .92, 4+ WAR season .90 (AAA seasons alone: .88, .87, .90, .88). '
+ 'Cross-validated accuracy (AUC): 10+ WAR .89, 3+ WAR season .89, 20+ WAR .92, 5+ WAR season .93 (AAA seasons alone: .88, .87, .90, .91). '
  'Caveat: a player who DHed because of an injury is treated like a 1B/DH. Hitters with 130+ MLB at-bats before 2026 aren\'t included.</div>')
 ctrl=('<div class="controls"><input type="search" id="q" placeholder="Filter by player or team…" aria-label="Filter by player or team">'
  '<span class="lvls">Level <label><input type="checkbox" class="lvck" value="AAA" checked> AAA</label><label><input type="checkbox" class="lvck" value="AA" checked> AA</label><label><input type="checkbox" class="lvck" value="A+" checked> High-A</label><label><input type="checkbox" class="lvck" value="A" checked> Low-A</label></span>'
