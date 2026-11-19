@@ -1,8 +1,10 @@
-"""Build the modelling table: one row per (player, target season) with inputs known before that season."""
+"""Build the modelling table: one row per (player, target season) with inputs known before that season.
+MiLB park adjustment (on by default; BDL_MILB_PARK=0 to disable) (needs data/milb_pf_map.csv from milb_pf_map.py); BDL_MILB_PARK_SCALE (default 0.5)."""
 import numpy as np, pandas as pd, os
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
 LAGS = (1, 2, 3)
 H2STATS = ('bb', 'k', 'hr', 'babip', 'iso', 'obp', 'slg', 'woba', 'xwoba', 'ev', 'ev90', 'barrel', 'hardhit', 'la', 'oswing', 'zcontact', 'swstr', 'gb', 'pull')
+MILB_PARK = os.environ.get('BDL_MILB_PARK', '1') == '1'   # on by default since Nov 18 2026; 0 = old unadjusted lines
 def load(b=None):
     if b is None: b = pd.read_pickle(f'{D}/mlb.pkl')
     b = b[b.position != 'P'].copy()
@@ -30,11 +32,27 @@ def load(b=None):
         m = (v * n).groupby(b.Season).sum() / n.groupby(b.Season).sum()
         ps['v_' + s] = v - b.Season.map(m).fillna(0); ps['n_' + s] = n; lg[s] = m
     return ps, list(S), pd.DataFrame(lg)
+def milb_park(m):
+    """Per-line half-park multipliers e_<comp> = 1 + (pf - 1)/2 from the affiliate's 1-yr regressed factor. 1.0 when unknown."""
+    E = ['HR', '2B', '3B', 'BB', 'SO', 'AVG', 'OBP']
+    mp = pd.read_csv(f'{D}/milb_pf_map.csv')
+    org = m.Team.fillna('').str.replace(r'\s*\(.*\)$', '', regex=True)
+    key = pd.DataFrame({'Season': m.Season.values, 'lvl': m.lvl.values, 'org': org.values})
+    r = key.merge(mp, on=['Season', 'lvl', 'org'], how='left')
+    sc = float(os.environ.get('BDL_MILB_PARK_SCALE', '0.5'))   # share of the park deviation in a player's line; 0.5 = half his games at home
+    out = {c: 1 + (r['pf_' + c].fillna(1).values - 1) * sc for c in E}
+    return out, r['pf_HR'].notna().values
 def milb_table():
     m = pd.read_pickle(f'{D}/milb.pkl'); m['grp'] = m.lvl.replace({'A+': 'LO', 'A': 'LO'})
     for c in ('PA','AB','H','2B','3B','HR','BB','IBB','SO','HBP','SF','OBP','SLG','SwStr%','Spd','Age'): m[c] = pd.to_numeric(m[c], errors='coerce')
-    bip = (m.AB - m.SO - m.HR + m.SF).clip(lower=1)
-    V = dict(obp=m.OBP, iso=(m['2B'] + 2 * m['3B'] + 3 * m.HR) / m.AB.clip(lower=1), k=m.SO / m.PA, bb=(m.BB - m.IBB) / m.PA, hr=m.HR / m.PA, babip=(m.H - m.HR) / bip, spd=m.Spd, swstr=m['SwStr%'])
+    if MILB_PARK:   # neutralize the half of each line played in the affiliate's park
+        e, hit = milb_park(m); print(f'milb park: matched {hit.mean():.1%} of lines, {m.PA[hit].sum() / m.PA.sum():.1%} of PA')
+        hr = m.HR / e['HR']; d2 = m['2B'] / e['2B']; d3 = m['3B'] / e['3B']; so = m.SO / e['SO']; h = m.H / e['AVG']
+        ubb = (m.BB - m.IBB) / e['BB']; obp = m.OBP / e['OBP']
+    else:
+        hr, d2, d3, so, h, ubb, obp = m.HR, m['2B'], m['3B'], m.SO, m.H, m.BB - m.IBB, m.OBP
+    bip = (m.AB - so - hr + m.SF).clip(lower=1)
+    V = dict(obp=obp, iso=(d2 + 2 * d3 + 3 * hr) / m.AB.clip(lower=1), k=so / m.PA, bb=ubb / m.PA, hr=hr / m.PA, babip=(h - hr) / bip, spd=m.Spd, swstr=m['SwStr%'])
     out = m[['mlbam', 'Season', 'grp', 'lvl', 'PA', 'Age']].copy()
     for s, v in V.items():
         ok = v.notna(); w = m.PA.where(ok, 0); key = [m.Season, m.lvl]
@@ -97,6 +115,6 @@ def build(targets=range(2016, 2028), proj_team=None):
 if __name__ == '__main__':
     pj = pd.read_pickle(f'{D}/proj.pkl'); pt = pj[pj.sys == 'steamer'][['mlbam', 'Season', 'pteam']].rename(columns={'Season': 'Y'})
     T, stats, mstats, lg = build(proj_team=pt)
-    T.to_pickle(f'{D}/T.pkl'); pd.to_pickle((stats, mstats, lg), f'{D}/meta.pkl')
+    tag = os.environ.get('BDL_TAG', '')
+    T.to_pickle(f'{D}/T{tag}.pkl'); pd.to_pickle((stats, mstats, lg), f'{D}/meta{tag}.pkl')
     print(T.shape, T.groupby('Y').PA_t.agg(['count', 'sum']).T.round())
-    print(lg[['obp', 'slg', 'k', 'xwoba', 'ev90', 'sprint']].round(3))

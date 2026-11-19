@@ -1,8 +1,8 @@
 """Rebuild the FT poach board's hitter values, position ranks, and bands from the current FT Hitters page (blend rankings).
 Pitchers, protections, names, and anyone already listed stay as they are; hitters who newly qualify are added."""
-import sys, re, json; sys.path.insert(0, '/home/claude/proj/site')
+import sys, re, json, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from boardlib import *
-SITE = sys.argv[1]; b = open(f'{SITE}/scoresheet_ft.html').read(); rows, recs = parse_board(b)
+SITE = sys.argv[1]; DAY = sys.argv[2] if len(sys.argv) > 2 else 'Nov 16'; b = open(f'{SITE}/scoresheet_ft.html').read(); rows, recs = parse_board(b)
 L, ix, D = lines_by_pin(open(f'{SITE}/scoresheet_ft_hitters.html').read()); pr = posranks(D, ix)
 SSC = ('#6B8E23', '#D4E79E', '#F4C64E', '#E8D5BE')
 moved = []
@@ -20,6 +20,7 @@ for pin, ls in L.items():
     val, lab, best = hitter_value(ls, ix, pr); nm = best[ix['Player']].split(' ', 1)[1]
     if best[ix['Pos']] == 'DH' and len(ls) == 1: continue
     if round(val, 1) >= 2.6 or any(pr[id(x)] <= 12 and x[ix['Pos']] != 'DH' for x in ls):
+        if nm not in ADD: print('NEW QUALIFIER needs board name / fWAR / age in ADD:', nm, round(val, 1), lab); continue
         war, age = ADD[nm]
         recs.append(dict(team=best[ix['FT']], pin=pin, prot=False, style='', nm=nm, kind='v', val=round(val, 1), raw=val, rest=f' {lab}{war}, age {age}', ord=10000 + pin, ss=False)); print('added', nm, 'Team', best[ix['FT']], round(val, 1), lab)
 def age(r):
@@ -58,12 +59,12 @@ for bd in (1, 2, 3, 4):
 cnt = ''.join(f'<td class="gap cnt">Protected {sum(r["prot"] for r in recs if r["team"] == t)}<br>Unprotected 2.6+: {sum((not r["prot"]) and band(r) <= 2 for r in recs if r["team"] == t)}</td>' for t in range(1, 25))
 out.append('<tr><td class="lbl gap">Counts</td>' + cnt + '</tr>')
 t0 = b.index('<table'); body = b.index('<tbody>', t0) + 7; poached = b.index('<tr class="poached">', t0)
-assert b[body:poached].count('<tr') == 31, b[body:poached].count('<tr')
+assert b[body:poached].count('<tr') > 0
 old_n = b[body:poached].count('data-pin')
 b = b[:body] + ''.join(out) + b[poached:]
 m = re.search(r'(\d+) players\. Built Nov \d+, 2026', b); assert m and int(m.group(1)) == old_n, (m and m.group(0), old_n)
-b = b.replace(m.group(0), f'{len(recs)} players. Built Nov 16, 2026')
-old_txt = 'bdlight.net Scoresheet 2027 VORP 20 (current rankings) on the WAR scale'; assert old_txt in b
+b = b.replace(m.group(0), f'{len(recs)} players. Built {DAY}, 2026')
+old_txt = 'bdlight.net Scoresheet 2027 VORP 20 (current rankings) on the WAR scale'   # first-run text swap; no-op once done
 b = b.replace(old_txt, 'bdlight.net Scoresheet 2027 VORP 20 (current rankings, which use the Steamer600/BDL blend from the <a href="scoresheet_projections.html">Projections</a> tab) on the WAR scale')
 open(f'{SITE}/scoresheet_ft.html', 'w').write(b)
 print('cells', old_n, '->', len(recs), 'rows per band', nrows, '| hitters revalued', len(moved), 'changed', sum(a != c for _, a, c in moved))

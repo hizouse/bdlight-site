@@ -34,14 +34,15 @@ h = pd.DataFrame(rows).rename(columns={'xMLBAMID': 'mlbam'}); h['Team'] = h.Team
 h[num] = h[num].apply(pd.to_numeric, errors='coerce')
 for c in svk: h[c] = np.nan
 h.to_pickle(f'{D}/mlb_h2.pkl'); print('h2', h.shape, h.groupby('Season').PA.sum().to_dict()); print('mlb', b.shape, b.groupby('Season').PA.sum().round().to_dict())
-# ---------- MiLB
+# ---------- MiLB  (Team = parent org + level, e.g. "Nationals (AA)"; "- - -" = more than one org at that level; used for MiLB park factors)
 LV = {1: 'AAA', 2: 'AA', 3: 'A+', 4: 'A'}; rows = []
-mk = ['xMLBAMID','PlayerName','Season','Age','PA','AB','H','1B','2B','3B','HR','BB','IBB','SO','HBP','SF','OBP','SLG','GB%','FB%','LD%','Pull%','SwStr%','Spd','ISO','BABIP']
+mk = ['xMLBAMID','PlayerName','Team','Season','Age','PA','AB','H','1B','2B','3B','HR','BB','IBB','SO','HBP','SF','OBP','SLG','GB%','FB%','LD%','Pull%','SwStr%','Spd','ISO','BABIP']
 for f in glob.glob(f'{R}/milb_*_L*.json'):
     y, lv = re.search(r'milb_(\d+)_L(\d)', f).groups()
     for r in json.load(open(f)):
         x = {k: r.get(k) for k in mk}; x['lvl'] = LV[int(lv)]; x['Season'] = int(y); rows.append(x)
 m = pd.DataFrame(rows).rename(columns={'xMLBAMID': 'mlbam'}); m = m[m.mlbam.notna() & (m.PA > 0)].copy(); m['mlbam'] = m.mlbam.astype(int)
+m['Team'] = m.Team.map(strip)
 m.to_pickle(f'{D}/milb.pkl'); print('milb', m.shape, m.groupby('lvl').PA.sum().to_dict())
 # ---------- Preseason projections
 rows = []
