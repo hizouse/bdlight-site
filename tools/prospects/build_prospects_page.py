@@ -25,7 +25,7 @@ explain=('<div class="explain">The chance each 2026 Low-A, High-A, AA, and AAA h
  'Inputs, each compared with the player\'s own league that season: <b>age vs. league</b> (birthdate, July 1), park-adjusted <b>wOBA, K%, ISO, BB%</b>, plus <b>Speed Score</b>, <b>SwStr%</b>, <b>Pull%</b>, and GB/LD/FB rates; '
  'the prior season\'s age and stats; level; prior MLB at-bats; and <b>share of games at each position</b>. A player at two levels gets a PA-weighted blend.<br>'
  'Biggest factors for 10+ WAR (odds multiplier, all else equal): each year younger than league ×2.4; +1 SD wOBA ×1.9; +1 SD ISO ×1.4; +1 SD Speed ×1.3; 1 SD fewer strikeouts ×1.35; a full season at C or SS ×5.5, CF ×4 (vs. 1B/DH).<br>'
- 'Cross-validated accuracy (AUC): 10+ WAR .89, 3+ WAR season .89, 20+ WAR .92, 5+ WAR season .93 (AAA seasons alone: .88, .87, .90, .91). '
+ 'Cross-validated accuracy (AUC): 10+ WAR .89, 3+ WAR season .89, 20+ WAR .92, 5+ WAR season .93 (AAA seasons alone: .88, .87, .90, .92). '
  'Caveat: a player who DHed because of an injury is treated like a 1B/DH. Hitters with 130+ MLB at-bats before 2026 aren\'t included.</div>')
 ctrl=('<div class="controls"><input type="search" id="q" placeholder="Filter by player or team…" aria-label="Filter by player or team">'
  '<span class="lvls">Level <label><input type="checkbox" class="lvck" value="AAA" checked> AAA</label><label><input type="checkbox" class="lvck" value="AA" checked> AA</label><label><input type="checkbox" class="lvck" value="A+" checked> High-A</label><label><input type="checkbox" class="lvck" value="A" checked> Low-A</label></span>'
