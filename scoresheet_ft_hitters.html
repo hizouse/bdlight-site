@@ -102,9 +102,10 @@ const RKI=C.findIndex(c=>c.n==='Rk'),PRI=C.findIndex(c=>c.n==='Pos Rk'),AI=C.fin
 function ranks(){let k=key;if(k===RKI||k===PRI||C[k].f==='txt')k=AI;const d=C[k].d==='asc'?1:-1;
  const o=D.filter(inLg).sort((a,b)=>{const x=a[k],y=b[k];if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (x-y)*d});
  const R=new Map(),P=new Map(),pc={};o.forEach((r,i)=>{R.set(r,i+1);const p=String(r[PI]);pc[p]=(pc[p]||0)+1;P.set(r,pc[p])});return [R,P]}
-function render(){const s=q.value.trim().toLowerCase(),p=ps.value;const [RK,PR]=ranks();const val=(r,i)=>i===RKI?RK.get(r):i===PRI?PR.get(r):r[i];
+const fold=x=>String(x).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function render(){const s=fold(q.value.trim()),p=ps.value;const [RK,PR]=ranks();const val=(r,i)=>i===RKI?RK.get(r):i===PRI?PR.get(r):r[i];
  const sv=document.getElementById('st').value,av=+document.getElementById('ag').value,fv=document.getElementById('ftt').value;
- const rows=D.filter(r=>{const i=RI2.get(r);return (!sv||ST[i]===sv)&&(!av||(r[AGI]!=null&&r[AGI]<av))&&(!fv||String(r[FTI])===fv)}).filter(r=>inLg(r)&&(!s||r[NI].toLowerCase().includes(s))&&(!p||r[PI]===p))
+ const rows=D.filter(r=>{const i=RI2.get(r);return (!sv||ST[i]===sv)&&(!av||(r[AGI]!=null&&r[AGI]<av))&&(!fv||String(r[FTI])===fv)}).filter(r=>inLg(r)&&(!s||fold(r[NI]).includes(s))&&(!p||r[PI]===p))
   .sort((a,b)=>{const x=val(a,key),y=val(b,key);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
  tb.innerHTML=rows.map(r=>{const k=RI2.get(r);const tc=ST[k]==='D'?'drafted':r[FTI]===18?(ST[k]==='P'?'mine mp':'mine'):ST[k]==='P'?'prot':'';return `<tr class="${tc}">`+C.map((c,i)=>{const v=val(r,i);const cl=[c.f==='txt'?'l':'',c.g?'grp':'',SBC.has(c.n)?'sbc':'',c.f==='sz3'&&v!=null?(v>=0?'pos':'neg'):'',(i===RI&&r[PI]==='OF'&&v!=null&&v>=2.155)?'cf':''].join(' ');return `<td class="${cl}"${i===NI?` title="${v}"`:''}>${c.f==='txt'?v:fmt(v,c.f)}</td>`}).join('')+'</tr>'}).join('');
  cnt.textContent=rows.length+' lines';

@@ -59,11 +59,12 @@ function table(id,C,D,qid,cid,word,sel){{
  const t=document.getElementById(id),tb=t.querySelector('tbody'),q=document.getElementById(qid),cnt=document.getElementById(cid),ps=sel?document.getElementById(sel):null;
  const NI=1,PI=C.findIndex(c=>c.n==='Pos'),RI=C.findIndex(c=>c.n==='Proj Rng'),AI=C.findIndex(c=>c.n==='Def adj');let key=0,dir=1;
  t.querySelector('thead tr').innerHTML=C.map((c,i)=>`<th data-k="${{i}}" class="${{c.f==='txt'?'l':''}}" title="${{c.t}}">${{c.n}}</th>`).join('');
- function render(){{const s=q.value.trim().toLowerCase(),p=ps?ps.value:'';
+ const fold=x=>String(x).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();
+ function render(){{const s=fold(q.value.trim()),p=ps?ps.value:'';
   let k=key;if(k===0||C[k].f==='txt')k=AI;const d=C[k].d==='asc'?1:-1;
   const pool=D.filter(r=>!p||r[PI]===p);const R=new Map();pool.slice().sort((a,b)=>{{const x=a[k],y=b[k];if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (x-y)*d}}).forEach((r,i)=>R.set(r,i+1));
   const val=(r,i)=>i===0?R.get(r):r[i];
-  const rows=pool.filter(r=>!s||r[NI].toLowerCase().includes(s)).sort((a,b)=>{{const x=val(a,key),y=val(b,key);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*dir}});
+  const rows=pool.filter(r=>!s||fold(r[NI]).includes(s)).sort((a,b)=>{{const x=val(a,key),y=val(b,key);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*dir}});
   tb.innerHTML=rows.map(r=>'<tr>'+C.map((c,i)=>{{const v=val(r,i);const cl=[c.f==='txt'?'l':'',(c.f==='sz3'||c.f==='s2')&&v!=null&&v!==0?(v>0?'pos':'neg'):'',(i===RI&&r[PI]==='OF'&&v!=null&&v>=2.155)?'cf':''].join(' ');return `<td class="${{cl}}">${{c.f==='txt'?(v||''):fmt(v,c.f)}}</td>`}}).join('')+'</tr>').join('');
   cnt.textContent=rows.length+' '+word;
   t.querySelectorAll('th').forEach(th=>th.setAttribute('aria-sort',+th.dataset.k===key?(dir>0?'ascending':'descending'):'none'));}}

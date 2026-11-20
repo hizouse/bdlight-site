@@ -62,8 +62,9 @@ const tb=document.querySelector('#t tbody'),q=document.getElementById('q'),tm=do
 const NI=1,TI=2,RI=3,II=4,BI=C.findIndex(c=>c.n==='BDL ERA');let key=BI,dir=1;
 document.querySelector('#t thead tr').innerHTML=C.map((c,i)=>`<th data-k="${i}" class="${c.f==='txt'?'l':''} ${c.g?'grp':''}" title="${c.t}">${c.n}</th>`).join('');
 const cmp=(k,d)=>(a,b)=>{const x=a[k],y=b[k];if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*d};
-function render(){const s=q.value.trim().toLowerCase(),t=tm.value,r=ro.value,m=+mi.value;
- const rows=D.filter(x=>(!s||x[NI].toLowerCase().includes(s))&&(!t||(t==='-'?!x[TI]:x[TI]===t))&&(!r||x[RI]===r)&&x[II]>=m);
+const fold=x=>String(x).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function render(){const s=fold(q.value.trim()),t=tm.value,r=ro.value,m=+mi.value;
+ const rows=D.filter(x=>(!s||fold(x[NI]).includes(s))&&(!t||(t==='-'?!x[TI]:x[TI]===t))&&(!r||x[RI]===r)&&x[II]>=m);
  let k=key;if(k===0||C[k].f==='txt')k=BI;const R=new Map();rows.slice().sort(cmp(k,C[k].d==='asc'?1:-1)).forEach((x,i)=>R.set(x,i+1));
  const val=(x,i)=>i===0?R.get(x):x[i];
  rows.sort((a,b)=>{const x=val(a,key),y=val(b,key);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
