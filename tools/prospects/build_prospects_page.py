@@ -54,7 +54,7 @@ document.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{con
 q.addEventListener('input',render);lvs.forEach(x=>x.addEventListener('change',render));ps.addEventListener('change',render);
 render();"""
 html=('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n'
- f'<title>2026 Prospect Ranks</title><style>{css}\n.lvls{{display:inline-flex;gap:10px;align-items:center}}.lvls label{{display:inline-flex;gap:4px;align-items:center}}</style></head>\n<body><main>\n{nav}\n'
+ f'<title>2026 Prospect Ranks</title><style>{css}\n.wrap{{max-height:calc(100vh - 200px)}}.lvls{{display:inline-flex;gap:10px;align-items:center}}.lvls label{{display:inline-flex;gap:4px;align-items:center}}</style></head>\n<body><main>\n{nav}\n'
  '<h1>2026 Prospect Ranks</h1><p class="sub">Chance of MLB success from 2026 Low-A through Triple-A stats</p>\n'
  f'{explain}\n{ctrl}\n<div class="wrap dense"><table id="t"><thead><tr></tr></thead><tbody></tbody></table></div>\n{method}\n{foot}\n'
  f'</main><script>const D={json.dumps(D,ensure_ascii=False,separators=(",",":"))},C={json.dumps(C)};let key=10,dir=-1;\n{js}</script></body></html>\n')
