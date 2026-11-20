@@ -62,8 +62,9 @@ const tb=document.querySelector('#t tbody'),q=document.getElementById('q'),lvs=[
 const f2=x=>(x>0?'+':'')+x.toFixed(2);
 const fmt=(v,f)=>v==null?'':f==='int'?v.toLocaleString():f==='pct'?v.toFixed(1)+'%':f==='f1'?v.toFixed(1):f==='f1s'?(v>0?'+':'')+v.toFixed(1):f2(v);
 document.querySelector('#t thead tr').innerHTML=C.map((c,i)=>`<th data-k="${i}" class="${c.f==='txt'?'l':''} ${c.g?'grp':''}" title="${c.t||''}">${c.n}</th>`).join('');
-function render(){const s=q.value.trim().toLowerCase();
- const rows=D.filter(r=>(!s||r[1].toLowerCase().includes(s)||r[2].toLowerCase().includes(s))&&(()=>{const on=lvs.filter(x=>x.checked).map(x=>x.value);return r[4].split('/').some(l=>on.includes(l))})()&&(!ps.value||r[3].split(', ').some(x=>x.startsWith(ps.value+' '))))
+const fold=x=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function render(){const s=fold(q.value.trim());
+ const rows=D.filter(r=>(!s||fold(r[1]).includes(s)||fold(r[2]).includes(s))&&(()=>{const on=lvs.filter(x=>x.checked).map(x=>x.value);return r[4].split('/').some(l=>on.includes(l))})()&&(!ps.value||r[3].split(', ').some(x=>x.startsWith(ps.value+' '))))
   .sort((a,b)=>{const x=a[key],y=b[key];return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
  tb.innerHTML=rows.map(r=>'<tr>'+C.map((c,i)=>{const v=r[i];const cl=[c.f==='txt'?'l':'',c.g?'grp':'',c.f==='zc'?(v>=0?'pos':'neg'):'',c.f==='zr'?(v<=0?'pos':'neg'):''].join(' ');return `<td class="${cl}">${c.f==='txt'?v:fmt(v,c.f==='zr'?'zc':c.f)}</td>`}).join('')+'</tr>').join('');
  cnt.textContent=rows.length+' hitters';
