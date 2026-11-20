@@ -65,6 +65,6 @@ b = b[:body] + ''.join(out) + b[poached:]
 m = re.search(r'(\d+) players\. Built Nov \d+, 2026', b); assert m and int(m.group(1)) == old_n, (m and m.group(0), old_n)
 b = b.replace(m.group(0), f'{len(recs)} players. Built {DAY}, 2026')
 old_txt = 'bdlight.net Scoresheet 2027 VORP 20 (current rankings) on the WAR scale'   # first-run text swap; no-op once done
-b = b.replace(old_txt, 'bdlight.net Scoresheet 2027 VORP 20 (current rankings, which use the Steamer600/BDL blend from the <a href="scoresheet_projections.html">Projections</a> tab) on the WAR scale')
+b = b.replace(old_txt, 'bdlight.net Scoresheet 2027 VORP 20 (current rankings, which use the Steamer600/BDL blend from the <a href="projections_h.html">BDL H Projections</a> page) on the WAR scale')
 open(f'{SITE}/scoresheet_ft.html', 'w').write(b)
 print('cells', old_n, '->', len(recs), 'rows per band', nrows, '| hitters revalued', len(moved), 'changed', sum(a != c for _, a, c in moved))

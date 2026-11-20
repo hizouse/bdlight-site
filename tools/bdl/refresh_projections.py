@@ -1,5 +1,5 @@
 """Refresh every page that uses BDL projections from a new bdl_projections_2027.csv, in one pass:
-  scoresheet_projections.html  BDL OBP/SLG/OPS, Blend, Δ OPS, Rk
+  projections_h.html           BDL OBP/SLG/OPS, Blend, Δ OPS, Rk
   scoresheet.html              OBP/SLG/OPS (blend), Adj OPS, VORP 20, Rk, Pos Rk   (replacement levels recomputed)
   scoresheet_ft_hitters.html   same as Rankings (row order kept: PIN/PROT arrays are indexed by row)
   scoresheet_ft.html           FT poach board hitter values/bands, via rebuild_board.py
@@ -24,7 +24,7 @@ def shifted(f):
 old = shifted(sys.argv[4]) if len(sys.argv) > 4 else pd.read_csv(VALS); newv = shifted(NEW); new = newv.set_index('mlbam')
 old['k'] = old.Player.map(norm)
 # ---------- Projections page
-h, C, D, md = cd('scoresheet_projections.html'); ix = {c['n']: i for i, c in enumerate(C)}
+h, C, D, md = cd('projections_h.html'); ix = {c['n']: i for i, c in enumerate(C)}
 proj = {}; nomatch = []; moved = []
 for r in D:
     nm, tm = r[ix['Player']], r[ix['Team']] or ''
@@ -45,7 +45,7 @@ assert not nomatch, nomatch
 D.sort(key=lambda r: -r[ix['Blend OPS']]); [r.__setitem__(ix['Rk'], i + 1) for i, r in enumerate(D)]
 h = h[:md.start(1)] + json.dumps(D, ensure_ascii=False, separators=(',', ':')) + h[md.end(1):]
 h = re.sub(r'Built Nov \d+, 2026', f'Built {DAY}, 2026', h)
-open(f'{SITE}/scoresheet_projections.html', 'w').write(h)
+open(f'{SITE}/projections_h.html', 'w').write(h)
 mv = pd.DataFrame(moved, columns=['Player', 'dBDL_OPS'])
 print(f'projections: {len(D)} rows, BDL OPS moved mean |%.4f| max %+.3f / %+.3f' % (mv.dBDL_OPS.abs().mean(), mv.dBDL_OPS.min(), mv.dBDL_OPS.max()))
 # ---------- Rankings + FT Hitters

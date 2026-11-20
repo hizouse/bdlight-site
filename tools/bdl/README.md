@@ -25,3 +25,16 @@ MiLB park adjustment (Nov 18, 2026; features.py, on by default, BDL_MILB_PARK=0 
 Refreshes Projections (BDL, Blend, Δ, Rk), 2027 Rankings and FT Hitters (OBP/SLG/OPS, Adj OPS, VORP 20, ranks), and the FT poach board
 (rebuild_board.py) in one pass. Matches site rows through bdl_site_values.csv (the BDL values currently on the site), then rewrites it.
 rebuild_board.py prints NEW QUALIFIER for any hitter who newly makes the board; add his name/fWAR/age to its ADD dict and rerun.
+
+## Site layout (Nov 20, 2026)
+Hitter projections moved from the Scoresheet section to MLB: `projections_h.html` ("BDL H Projections"; Scoresheet wording removed).
+`scoresheet_projections.html` is now a redirect stub. The Scoresheet range/catcher page (`scoresheet_defense.html`) has its own
+"Defense" tab in the Scoresheet nav. `refresh_projections.py`, `rebuild_board.py`, and `build_defense.py` use the new file names;
+`blend_site.py` is the historical Nov 16 migration (don't rerun).
+
+## Pitcher ERA page (BDL P Projections)
+    python tools/bdl/build_pitching_page.py . "Nov 20"
+Builds `projections_p.html` from `tools/bdl/pitching/bdl_pitcher_era_2027.csv` and `team_defense_2027.csv`, which come from
+`pitching/project2027.py` (Baseball projections Project, pitching_era_study: Steamer ERA + Stuff+/Location+ + shrink toward average +
+projected team DRS from FanGraphs Depth Charts). To refresh after roster moves: rerun project2027.py with fresh FanGraphs pulls, copy the
+two CSVs here, rerun build_pitching_page.py.

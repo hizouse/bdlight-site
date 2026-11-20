@@ -1,4 +1,5 @@
-"""Put the Steamer600/BDL 50-50 blend on the bdlight.net Scoresheet pages (Projections, Rankings, FT Hitters)."""
+"""HISTORICAL (one-time Nov 16 migration; do not rerun): the hitting page is now projections_h.html, under MLB, with the Scoresheet wording removed.
+Put the Steamer600/BDL 50-50 blend on the bdlight.net Scoresheet pages (Projections, Rankings, FT Hitters)."""
 import re, json, sys, unicodedata, numpy as np, pandas as pd
 SITE = sys.argv[1]; P = '/home/claude/proj'
 def cd(f):

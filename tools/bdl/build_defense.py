@@ -1,5 +1,5 @@
-"""Build scoresheet_defense.html (range, error, and catcher SB/CS projections) from the Rankings page data, and add a
-Hitting/Defense sub-menu to the Projections page."""
+"""Build scoresheet_defense.html (range, error, and catcher SB/CS projections) from the Rankings page data.
+It has its own Defense tab in the Scoresheet nav (the hitting projections moved to projections_h.html under MLB)."""
 import sys, re, json, numpy as np; sys.path.insert(0, '/home/claude/proj/site')
 from boardlib import cd
 SITE = sys.argv[1]; rk = open(f'{SITE}/scoresheet.html').read(); C, D, ix = cd(rk)
@@ -24,24 +24,19 @@ CK = [col('Rk', 'int', 'Rank by the column you sorted (by Def adj when sorting b
       col('SB', 'f2', 'Projected 2027 Scoresheet SB-allowed rating for his league (lower = better)', 'asc'), col('CS', 'f2', 'Projected 2027 Scoresheet CS rating (higher = better)'),
       col('SB/CS value', 'sz3', 'SB/CS ratings in OPS points (SB +0.20, CS -0.42 runs; scaled to 70% steal volume)'), col('Err adj', 'sz3', 'Catcher error adjustment (+ = fewer errors than average)'),
       col('Def adj', 'sz3', 'Total catcher defensive value in OPS points: SB/CS value plus the error adjustment. This is what the Rankings tab adds at OBP weight 1.0')]
-pj = open(f'{SITE}/scoresheet_projections.html').read()
-SUBCSS = '.subnav{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin:-10px 0 18px}.subnav .lvl{font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--muted);padding:6px 6px 6px 0}.subnav a{padding:4px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);text-decoration:none;font-size:.86rem}.subnav a:hover{color:var(--fg)}.subnav a.on{background:var(--head);border-color:var(--head);color:#fff;font-weight:600}'
-sub = lambda on: '<div class="subnav"><span class="lvl">PROJECTIONS</span><a href="scoresheet_projections.html"%s>Hitting</a><a href="scoresheet_defense.html"%s>Defense</a></div>' % ((' class="on"', '') if on == 'h' else ('', ' class="on"'))
-nav = pj[pj.index('<nav>'):pj.index('</nav>') + 6]
-if 'class="subnav"' not in pj:
-    pj = pj.replace('</style></head>', SUBCSS + '</style></head>', 1).replace(nav, nav + sub('h'), 1)
-    pj = pj.replace('for 2026 and 2025 are shown for reference.', 'for 2026 and 2025 are shown for reference. Range, error, and catcher SB/CS projections are on the <a href="scoresheet_defense.html">Defense</a> page.')
-    assert 'scoresheet_defense.html">Defense</a> page' in pj; open(f'{SITE}/scoresheet_projections.html', 'w').write(pj)
+pj = open(f'{SITE}/projections_h.html').read()   # styling only
+SUBCSS = ''
+nav = re.search(r'<nav>.*?</nav>', rk).group(0).replace(' class="on"', '').replace('<a href="scoresheet_defense.html">', '<a href="scoresheet_defense.html" class="on">')
+assert 'scoresheet_defense.html" class="on"' in nav
 css = pj[pj.index('<style>') + 7:pj.index('</style>')]
 css = re.sub(r'[^{}]*nth-child[^{}]*\{[^{}]*\}', '', css); css = css.replace('#t thead th', '.t thead th')
 css += '.t th:nth-child(1),.t td:nth-child(1){position:sticky;left:0;width:48px;min-width:48px;max-width:48px;z-index:1;background:var(--bg)}.t th:nth-child(2),.t td:nth-child(2){position:sticky;left:48px;min-width:170px;z-index:1;text-align:left;background:var(--bg);box-shadow:inset -1px 0 0 var(--line)}.t thead th:nth-child(1),.t thead th:nth-child(2){z-index:3;background:var(--head)}.t tbody tr:nth-child(even){background:var(--row)}.t tbody tr:nth-child(even) td:nth-child(1),.t tbody tr:nth-child(even) td:nth-child(2){background:var(--row)}'
-if SUBCSS not in css: css += SUBCSS
 css += 'td.cf{color:#b45309;font-weight:700}@media (prefers-color-scheme:dark){td.cf{color:#f5a524}}h2{font-size:1.15rem;margin:26px 0 8px}.wrap{max-height:80vh}'
 html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scoresheet 2027 Defense Projections</title><style>{css}</style></head>
 <body><main>
-{nav}{sub('d')}
+{nav}
 <h1>Scoresheet 2027 Defense Projections</h1><p class="sub">Projected range and errors for {len(F)} fielder lines, and SB/CS ratings for {len(K)} catchers · hitters on the Rankings tab · <a href="#catchers" style="color:inherit">jump to catchers</a></p>
 <div class="explain"><b>Range.</b> The projected 2027 Scoresheet range comes from 2025&ndash;26 DRS and OAA with errors backed out, lowered for heavy DH use at OF and 1B, and held within &plusmn;.07 of the 2026 range, as Scoresheet did for 2026. Players get one line per position where they played 20+ games in 2026. <span style="color:#b45309;font-weight:700">Highlighted</span> OF ranges of 2.16+ are above the ~2.15 average center fielder, whose range counts about 1.4&times; in the sim.<br>
 <b>Errors.</b> Projected from each player&rsquo;s MLB errors per chance over recent seasons, weighted toward the latest and regressed heavily toward the position average, then converted to errors per game at the position&rsquo;s average chances. Err adj is in range units: one extra error per 10 games = &minus;0.07 range.<br>
