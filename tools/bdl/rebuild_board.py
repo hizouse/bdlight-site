@@ -8,6 +8,7 @@ SSC = ('#6B8E23', '#D4E79E', '#F4C64E', '#E8D5BE')
 moved = []
 for i, r in enumerate(recs):
     r['ord'] = i; r['ss'] = any(c in r['style'] for c in SSC); r['raw'] = r['val']
+    if r['pin'] in L: r['team'] = L[r['pin']][0][ix['FT']]   # follow trades recorded on the FT Hitters page
     if r['kind'] == 'v' and r['pin'] in L:
         val, lab, best = hitter_value(L[r['pin']], ix, pr); tail = r['rest'][r['rest'].index(','):] if ',' in r['rest'] else ''
         moved.append((r['nm'], r['val'], round(val, 1))); r['raw'] = val; r['val'] = round(val, 1); r['rest'] = ' ' + lab + tail
