@@ -4,7 +4,7 @@ import json, re, pandas as pd, pathlib
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 a=pd.read_csv(pathlib.Path(__file__).with_name('prospects_2026_scored.csv')).sort_values('y10',ascending=False).reset_index(drop=True)
 css=re.search(r'<style>(.*?)</style>',(ROOT/'aaa.html').read_text(),re.S).group(1)
-C=[dict(n='Rank',f='int',t='Rank by P(10+ career WAR)',d='asc'),dict(n='Player',f='txt',d='asc'),dict(n='Team',f='txt',t='MLB organization in 2026 (most PA first if he changed orgs)',d='asc'),
+C=[dict(n='Rank',f='int',t='Rank in the current sort (and among the hitters currently shown). Click to return to the 10+ WAR order.',d='asc'),dict(n='Player',f='txt',d='asc'),dict(n='Team',f='txt',t='MLB organization in 2026 (most PA first if he changed orgs)',d='asc'),
    dict(n='Pos',f='txt',t='2026 share of games by position (MLB Stats API). C, SS and CF get the biggest boosts.',d='asc'),
    dict(n='Level',f='txt',t='Levels whose stats are used (see Stats)',d='asc'),
    dict(n='Stats',f='txt',t='2026 = 150+ PA at one level; 2026 combined = 150+ PA in 2026 but split so no level reached 150 (levels pooled); 2025 = fewer than 150 PA in 2026 (usually injury): starts from his 2025 season, lowered for the missed time and adjusted for his limited 2026 hitting; Level, PA and the z columns are from 2025',d='asc'),
@@ -48,14 +48,14 @@ const fold=x=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 function render(){const s=fold(q.value.trim());
  const rows=D.filter(r=>(!s||fold(r[1]).includes(s)||fold(r[2]).includes(s))&&(()=>{const on=lvs.filter(x=>x.checked).map(x=>x.value);return r[4].split('/').some(l=>on.includes(l))})()&&(!ps.value||r[3].split(', ').some(x=>x.startsWith(ps.value+' '))))
   .sort((a,b)=>{const x=a[key],y=b[key];return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
- tb.innerHTML=rows.map(r=>'<tr>'+C.map((c,i)=>{const v=r[i];const cl=[c.f==='txt'?'l':'',c.g?'grp':'',c.f==='zc'?(v>=0?'pos':'neg'):'',c.f==='zr'?(v<=0?'pos':'neg'):''].join(' ');return `<td class="${cl}">${c.f==='txt'?v:fmt(v,c.f==='zr'?'zc':c.f)}</td>`}).join('')+'</tr>').join('');
+ tb.innerHTML=rows.map((r,j)=>'<tr>'+C.map((c,i)=>{const v=i===0?j+1:r[i];const cl=[c.f==='txt'?'l':'',c.g?'grp':'',c.f==='zc'?(v>=0?'pos':'neg'):'',c.f==='zr'?(v<=0?'pos':'neg'):''].join(' ');return `<td class="${cl}">${c.f==='txt'?v:fmt(v,c.f==='zr'?'zc':c.f)}</td>`}).join('')+'</tr>').join('');
  cnt.textContent=rows.length+' hitters';
  document.querySelectorAll('th').forEach(th=>th.setAttribute('aria-sort',+th.dataset.k===key?(dir>0?'ascending':'descending'):'none'));}
 document.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{const k=+th.dataset.k;if(k===key)dir=-dir;else{key=k;dir=(C[k].d==='asc')?1:-1}render()}));
 q.addEventListener('input',render);lvs.forEach(x=>x.addEventListener('change',render));ps.addEventListener('change',render);
 render();"""
 html=('<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n'
- f'<title>2026 Prospect Ranks</title><style>{css}\n.wrap{{max-height:calc(100vh - 200px)}}.lvls{{display:inline-flex;gap:10px;align-items:center}}.lvls label{{display:inline-flex;gap:4px;align-items:center}}</style></head>\n<body><main>\n{nav}\n'
+ f'<title>2026 Prospect Ranks</title><style>{css}\n.wrap{{max-height:calc(100vh - 150px)}}.lvls{{display:inline-flex;gap:10px;align-items:center}}.lvls label{{display:inline-flex;gap:4px;align-items:center}}</style></head>\n<body><main>\n{nav}\n'
  '<h1>2026 Prospect Ranks</h1><p class="sub">Chance of MLB success from 2026 Low-A through Triple-A stats</p>\n'
  f'{explain}\n{ctrl}\n<div class="wrap dense"><table id="t"><thead><tr></tr></thead><tbody></tbody></table></div>\n{method}\n{foot}\n'
  f'</main><script>const D={json.dumps(D,ensure_ascii=False,separators=(",",":"))},C={json.dumps(C)};let key=10,dir=-1;\n{js}</script></body></html>\n')
