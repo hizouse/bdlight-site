@@ -24,13 +24,26 @@ for pin, ls in L.items():
         if nm not in ADD: print('NEW QUALIFIER needs board name / fWAR / age in ADD:', nm, round(val, 1), lab); continue
         war, age = ADD[nm]
         recs.append(dict(team=best[ix['FT']], pin=pin, prot=False, style='', nm=nm, kind='v', val=round(val, 1), raw=val, rest=f' {lab}{war}, age {age}', ord=10000 + pin, ss=False)); print('added', nm, 'Team', best[ix['FT']], round(val, 1), lab)
+# top prospects from the FT Prospects page: tag every one with his combined rank; add rostered ones not yet on the board
+PH = open(f'{SITE}/scoresheet_ft_prospects.html').read(); PC, PD, pix = cd(PH); PP = json.loads(re.search(r'const PIN=(\[.*?\]);', PH, re.S).group(1))
+PROS = {pin: r for pin, r in zip(PP, PD) if pin}
+for r in recs:
+    r['rest'] = re.sub(r', Comb [\d.]+', '', r['rest'])
+    if r['pin'] in PROS: r['rest'] += f", Comb {PROS[r['pin']][pix['Combined']]:.1f}"
+onboard = {r['pin'] for r in recs}; newp = 0
+for pin, x in PROS.items():
+    if pin in onboard: continue
+    tags = ''.join(f', {k}#{x[pix[k]]}' for k in ('BA', 'FG') if x[pix[k]])
+    recs.append(dict(team=x[pix['FT']], pin=pin, prot=False, style='', nm=x[pix['Player']] + (' <i>(P)</i>' if x[pix['Pos']] == 'P' else ''), kind='', val=None, raw=None,
+                     rest=f" {x[pix['Pos']]}, age {x[pix['Age']] - 1}{tags}, Comb {x[pix['Combined']]:.1f}", ord=20000 + pin, ss=False)); newp += 1
+print('prospects tagged', sum(1 for r in recs if 'Comb ' in r['rest']), 'added', newp)
 def age(r):
     m = re.search(r'age (\d+)', r['rest']); return int(m.group(1)) if m else None
 def band(r):
     v = r['val']
     if v is not None and v >= 3.6: return 1
     if v is not None and v >= 2.6: return 2
-    return 4 if ('BA#' in r['rest'] or ', IP ' in r['rest'] or v is None) else 3
+    return 4 if ('BA#' in r['rest'] or 'Comb ' in r['rest'] or ', IP ' in r['rest'] or v is None) else 3
 def style(r):
     if r['prot']: return ''
     bd = band(r); a = age(r); ss = r['ss']
@@ -42,10 +55,11 @@ def style(r):
     return 'background:#FBE5D6;color:#7F3F00' if ', IP ' in r['rest'] else 'background:#F8CBAD;color:#000'
 def key(r):
     if band(r) == 4:
-        if 'BA#' in r['rest'] and ', IP ' not in r['rest']: return (0, int(re.search(r'BA#(\d+)', r['rest']).group(1)), 0)
+        if 'Comb ' in r['rest']: return (0, float(re.search(r'Comb ([\d.]+)', r['rest']).group(1)), 0)
+        if 'BA#' in r['rest'] and ', IP ' not in r['rest']: return (0, 50 + int(re.search(r'BA#(\d+)', r['rest']).group(1)), 0)
         return (1, -(r['val'] if r['val'] is not None else -9), r['ord'])
     return (-r['val'], -r['raw'] if r['kind'] == 'v' else 0, r['ord'])
-LAB = {1: {0: '3.6+', 1: 'VORP .070+'}, 2: {0: '2.6–3.5', 1: '&lt; age 28', 4: 'Age 28+'}, 3: {0: 'Others', 1: 'Top 12 at pos', 2: 'or already', 3: 'listed'}, 4: {0: 'BA Top 50,', 1: 'then SP under', 2: '100 IP'}}
+LAB = {1: {0: '3.6+', 1: 'VORP .070+'}, 2: {0: '2.6–3.5', 1: '&lt; age 28', 4: 'Age 28+'}, 3: {0: 'Others', 1: 'Top 12 at pos', 2: 'or already', 3: 'listed'}, 4: {0: 'Prospects,', 1: 'by combined', 2: 'rank; then SP', 3: 'under 100 IP'}}
 def cell(r, gap):
     w = f"<span class=w>{r['kind']}{r['val']:.1f}</span>" if r['kind'] else ''
     cls = 'c' + (' gap' if gap else '') + (' prot' if r['prot'] else ''); st = style(r)
@@ -66,6 +80,8 @@ b = b[:body] + ''.join(out) + b[poached:]
 m = re.search(r'(\d+) players\. Built Nov \d+, 2026', b); assert m and int(m.group(1)) == old_n, (m and m.group(0), old_n)
 b = b.replace(m.group(0), f'{len(recs)} players. Built {DAY}, 2026')
 old_txt = 'bdlight.net Scoresheet 2027 VORP 20 (current rankings) on the WAR scale'   # first-run text swap; no-op once done
+b = b.replace('<span style="--c:#F8CBAD">BA Top 50 prospect</span>', '<span style="--c:#F8CBAD">Top prospect (FT Prospects page)</span>')
+b = b.replace('BA Top 50 prospects by rank, then starters Steamer projects for under 100 MLB IP.', 'top prospects (everyone on the <a href="scoresheet_ft_prospects.html">FT Prospects</a> page: BA top 50, or top 25 for FanGraphs or any BDL Prospect Ranks list), ordered by that page&rsquo;s combined rank and tagged Comb, then starters Steamer projects for under 100 MLB IP.')
 b = b.replace(old_txt, 'bdlight.net Scoresheet 2027 VORP 20 (current rankings, which use the Steamer600/BDL blend from the <a href="projections_h.html">BDL H Projections</a> page) on the WAR scale')
 open(f'{SITE}/scoresheet_ft.html', 'w').write(b)
 print('cells', old_n, '->', len(recs), 'rows per band', nrows, '| hitters revalued', len(moved), 'changed', sum(a != c for _, a, c in moved))
