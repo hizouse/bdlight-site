@@ -81,7 +81,7 @@ m = re.search(r'(\d+) players\. Built Nov \d+, 2026', b); assert m and int(m.gro
 b = b.replace(m.group(0), f'{len(recs)} players. Built {DAY}, 2026')
 old_txt = 'bdlight.net Scoresheet 2027 VORP 20 (current rankings) on the WAR scale'   # first-run text swap; no-op once done
 b = b.replace('<span style="--c:#F8CBAD">BA Top 50 prospect</span>', '<span style="--c:#F8CBAD">Top prospect (FT Prospects page)</span>')
-b = b.replace('BA Top 50 prospects by rank, then starters Steamer projects for under 100 MLB IP.', 'top prospects (everyone on the <a href="scoresheet_ft_prospects.html">FT Prospects</a> page: BA top 50, or top 25 for FanGraphs or any BDL Prospect Ranks list), ordered by that page&rsquo;s combined rank and tagged Comb, then starters Steamer projects for under 100 MLB IP.')
+b = b.replace('BA Top 50 prospects by rank, then starters Steamer projects for under 100 MLB IP.', 'top prospects (everyone on the <a href="scoresheet_ft_prospects.html">FT Prospects</a> page: BA top 50, or top 30 for FanGraphs or any BDL Prospect Ranks list), ordered by that page&rsquo;s combined rank and tagged Comb, then starters Steamer projects for under 100 MLB IP.')
 b = b.replace(old_txt, 'bdlight.net Scoresheet 2027 VORP 20 (current rankings, which use the Steamer600/BDL blend from the <a href="projections_h.html">BDL H Projections</a> page) on the WAR scale')
 open(f'{SITE}/scoresheet_ft.html', 'w').write(b)
 print('cells', old_n, '->', len(recs), 'rows per band', nrows, '| hitters revalued', len(moved), 'changed', sum(a != c for _, a, c in moved))
