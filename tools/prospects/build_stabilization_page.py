@@ -17,9 +17,9 @@ rows = ''.join(f'<tr><td>{s}</td><td class="num"><b>{m}</b></td><td class="num">
 html = f'''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stabilization Points</title><style>{css}
 table.st{{border-collapse:collapse;margin:10px 0 18px;font-size:.9rem}} table.st th,table.st td{{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}}
-table.st td.num,table.st th.num{{text-align:right;font-variant-numeric:tabular-nums}} .narrow{{max-width:900px}} .narrow p{{line-height:1.5}}</style></head><body>
+table.st td.num,table.st th.num{{text-align:right;font-variant-numeric:tabular-nums}} .narrow{{max-width:900px}} .indent{{margin-left:32px;margin-right:16px}} .narrow p{{line-height:1.5}}</style></head><body>
 {nav}
-<h1>Stabilization Points</h1><p class="sub">How quickly minor-league hitting stats become trustworthy, and how Prospect Ranks uses that</p>
+<div class="indent"><h1>Stabilization Points</h1><p class="sub">How quickly minor-league hitting stats become trustworthy, and how Prospect Ranks uses that</p>
 <div class="narrow">
 <p>A hitter's stat line is part skill and part luck. The <b>stabilization point</b> is the number of plate appearances at which a stat is half skill and half noise. After <i>n</i> PA, the share that is skill is <i>n</i> ÷ (<i>n</i> + stabilization point). <a href="minors_prospects.html">Prospect Ranks</a> uses these numbers to pull each stat toward league average before scoring a hitter: a stat that stabilizes at 400 PA, seen over 400 PA, keeps half of its distance from average; over 150 PA, about a quarter.</p>
 <table class="st"><thead><tr><th>Stat</th><th class="num">Used (PA)</th><th class="num">Noise math</th><th class="num">1st vs. 2nd half</th><th class="num">Season to season (ceiling)</th><th class="num">Skill share at 50 PA</th><th class="num">at 150 PA</th><th class="num">at 400 PA</th><th>Note</th></tr></thead><tbody>{rows}</tbody></table>
@@ -30,8 +30,8 @@ table.st td.num,table.st th.num{{text-align:right;font-variant-numeric:tabular-n
 <li><b>First half vs. second half</b> (13,333 hitters with 100+ PA at the same level in each half of a season, from the MLB Stats API): how well a hitter's first-half stat predicts his second-half stat. This covers ISO and wOBA too. It runs a little high, since some hitters really do change during a season.</li>
 <li><b>Season to season</b> (hitters with 250+ PA in consecutive seasons): this mixes real development in with the noise, so it only gives a ceiling. It's the only estimate available for Speed Score.</li>
 </ul>
-<p>The values used are rounded from the first two methods where they agree. Level barely matters (K% stabilizes at about 50 PA in Low-A and 55 in Triple-A; BB% at 100 and 114), so one set is used for all four levels. The order matches the usual MLB rules of thumb: strikeouts settle fastest, then walks, then power, then results on balls in play (BABIP, about 850 PA, isn't a model input).</p>
+<p>The values used are rounded from the first two methods where they agree. Level barely matters (K% stabilizes at about 50 PA in Low-A and 55 in Triple-A; BB% at 100 and 114), so one set is used for all four levels. The order matches the usual <a href="https://library.fangraphs.com/principles/sample-size/">MLB rules of thumb</a>: strikeouts settle fastest, then walks, then power, then results on balls in play (BABIP, about 850 PA, isn't a model input).</p>
 <p><b>Does it help?</b> Yes, modestly. Refitting the model with the regressed stats improved accuracy on players it wasn't trained on for all five outcomes (10+ WAR AUC .900 → .902, beating the old version in 88–98% of resamples). Halving or doubling every stabilization point gave nearly the same result. Each level's stats are regressed by that level's PA: regressing by the season's total PA tested worse, because a short stint at a new level says less than the same PA spent at one level.</p>
 <p><b>How it's applied:</b> both seasons the model uses are regressed, each by its own PA. A hitter who missed most of 2026 is scored from his regressed 2025 season, then adjusted for his limited 2026 hitting as the Prospect Ranks page describes.</p>
-</div></body></html>'''
+</div></div></body></html>'''
 (ROOT / 'minors_stabilization.html').write_text(html); print('ok', len(html))
